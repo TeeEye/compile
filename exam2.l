@@ -16,6 +16,11 @@
 #define NUMBER      21
 #define RELOP       22
 #define BRACKET  	1000
+#define SEMICOLON   1001
+#define ASSIGN		1002
+#define IF			1003
+#define ELSE		1004
+#define ALGOP		1006
 
 #define NEWLINE     23
 #define ERRORCHAR   24
@@ -26,11 +31,15 @@
  
 delim		[ \t \n]
 ws			{delim}+
-letter	[A-Za-z]
+letter	[A-Za-z_]
 digit		[0-9]
 id			{letter}({letter}|{digit})*
 number	{digit}+(\.{digit}+)?(E[+-]?{digit}+)?
 bracket [\(\)\{\}]
+comment [/][/].*
+algop   [\+\-\*/]
+
+
 
 /* 状态（或条件）定义可以定义在这里 
  * INITIAL是一个默认的状态，不需要定义
@@ -47,17 +56,22 @@ bracket [\(\)\{\}]
 
 <INITIAL>{ws}	          {;}
 <INITIAL>while					{return (WHILE);}
+<INITIAL>if				  {return (IF);}
+<INITIAL>else			  {return (ELSE);}
 <INITIAL>do		          {return (DO);}
 <INITIAL>{id}	          {return (ID);}
 <INITIAL>{number}	      {return (NUMBER);}
 <INITIAL>{bracket}		  {return (BRACKET);}
 <INITIAL>"<"	          {return (RELOP);}
 <INITIAL>"<="	          {return (RELOP);}
-<INITIAL>"="	          {return (RELOP);}
-<INITIAL>"<>"	          {return (RELOP);}
+<INITIAL>"=="	          {return (RELOP);}
+<INITIAL>"!="	          {return (RELOP);}
 <INITIAL>">"	          {return (RELOP);}
 <INITIAL>">="	          {return (RELOP);}
-
+<INITIAL>";"		      {return (SEMICOLON);}
+<INITIAL>"="			  {return (ASSIGN);}
+<INITIAL>{comment}		  {;}
+<INITIAL>{algop}		  {return (ALGOP);}
 <INITIAL>.							{return ERRORCHAR;}
 
  
@@ -76,6 +90,11 @@ void writeout(int c){
     case NUMBER: fprintf(yyout, "(NUM, \"%s\") ", yytext);break;
 	case BRACKET: fprintf(yyout, "(BRACKET, \"%s\") ", yytext);break;
     case ID: fprintf(yyout, "(ID, \"%s\") ", yytext);break;
+	case ASSIGN: fprintf(yyout, "(ASSIGN, \"%s\")", yytext);break;
+	case SEMICOLON: fprintf(yyout, "(SEMICOLON, \"%s\")", yytext); break;
+	case IF: fprintf(yyout, "(IF, \"%s\")", yytext); break;
+	case ELSE: fprintf(yyout, "(ELSE, \"%s\")", yytext); break;
+	case ALGOP: fprintf(yyout, "(ALGOP, \"%s\")", yytext); break;
     case NEWLINE: fprintf(yyout, "\n");break;
     default:break;
   }
